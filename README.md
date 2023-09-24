@@ -1,126 +1,78 @@
-## Segment Anything Simple Web demo
+# SAM Implementation Demo 📊
 
-This **front-end only** React based web demo shows how to load a fixed image and corresponding `.npy` file of the SAM image embedding, and run the SAM ONNX model in the browser using Web Assembly with mulithreading enabled by `SharedArrayBuffer`, Web Worker, and SIMD128.
+Welcome to the SAM Implementation Demo App ! 👋
 
-<img src="https://github.com/facebookresearch/segment-anything/raw/main/assets/minidemo.gif" width="500"/>
+Welcome to the SAM Implementation Demo repository! Here, you'll discover a fascinating demo that illustrates how to implement the Segmentation-Aware Message Passing (SAM) technique developed by Facebook Research.
 
-## Run the app
+## About SAM
+SAM is a machine learning technique used in image and graphics segmentation tasks. It enables neural networks to communicate effectively and understand spatial relationships within segmentation data.
 
-Install Yarn
+## 👨‍💻 How to Contribute
+I'm thrilled to have you contribute to SAM Implementation Demo !
+Follow these steps to get started:
 
-```
-npm install --g yarn
-```
+### Fork the Repository: 
+Click the "Fork" button at the upper-right corner of the repository page. This action will create a personal copy of the repository in your GitHub account.
 
-Build and run:
+### Clone the Forked Repository: 
+Clone your forked repository to your local machine using this command:
 
-```
-yarn && yarn start
-```
-
-Navigate to [`http://localhost:8081/`](http://localhost:8081/)
-
-Move your cursor around to see the mask prediction update in real time.
-
-## Export the image embedding
-
-In the [ONNX Model Example notebook](https://github.com/facebookresearch/segment-anything/blob/main/notebooks/onnx_model_example.ipynb) upload the image of your choice and generate and save corresponding embedding.
-
-Initialize the predictor:
-
-```python
-checkpoint = "sam_vit_h_4b8939.pth"
-model_type = "vit_h"
-sam = sam_model_registry[model_type](checkpoint=checkpoint)
-sam.to(device='cuda')
-predictor = SamPredictor(sam)
+```bash
+  git clone https://github.com/SantiSB/segmentation-anything-model.git
 ```
 
-Set the new image and export the embedding:
+### Switch to the Develop Branch: 
+Navigate to the develop branch to ensure your work aligns with the latest development state:
 
-```
-image = cv2.imread('src/assets/dogs.jpg')
-predictor.set_image(image)
-image_embedding = predictor.get_image_embedding().cpu().numpy()
-np.save("dogs_embedding.npy", image_embedding)
+```bash
+git checkout develop
 ```
 
-Save the new image and embedding in `src/assets/data`.
+### Create a New Branch: 
+Move to the repository's directory and create a new branch for your contribution. Name the branch descriptively, such as feature-your-feature or bugfix-the-bug:
 
-## Export the ONNX model
-
-You also need to export the quantized ONNX model from the [ONNX Model Example notebook](https://github.com/facebookresearch/segment-anything/blob/main/notebooks/onnx_model_example.ipynb).
-
-Run the cell in the notebook which saves the `sam_onnx_quantized_example.onnx` file, download it and copy it to the path `/model/sam_onnx_quantized_example.onnx`.
-
-Here is a snippet of the export/quantization code:
-
-```
-onnx_model_path = "sam_onnx_example.onnx"
-onnx_model_quantized_path = "sam_onnx_quantized_example.onnx"
-quantize_dynamic(
-    model_input=onnx_model_path,
-    model_output=onnx_model_quantized_path,
-    optimize_model=True,
-    per_channel=False,
-    reduce_range=False,
-    weight_type=QuantType.QUInt8,
-)
+```bash
+git checkout -b feature-your-feature
 ```
 
-**NOTE: if you change the ONNX model by using a new checkpoint you need to also re-export the embedding.**
+### Install Dependencies: 
+After cloning, navigate to the project directory and install required packages using npm:
 
-## Update the image, embedding, model in the app
-
-Update the following file paths at the top of`App.tsx`:
-
-```py
-const IMAGE_PATH = "/assets/data/dogs.jpg";
-const IMAGE_EMBEDDING = "/assets/data/dogs_embedding.npy";
-const MODEL_DIR = "/model/sam_onnx_quantized_example.onnx";
+```bash
+npm install
 ```
 
-## ONNX multithreading with SharedArrayBuffer
+### Make Your Changes: 
+Implement the necessary changes or improvements to the codebase.
 
-To use multithreading, the appropriate headers need to be set to create a cross origin isolation state which will enable use of `SharedArrayBuffer` (see this [blog post](https://cloudblogs.microsoft.com/opensource/2021/09/02/onnx-runtime-web-running-your-machine-learning-model-in-browser/) for more details)
+### Commit and Push: 
+Once you've made your changes, commit them with a clear and concise commit message. Then, push your changes to your forked repository:
 
-The headers below are set in `configs/webpack/dev.js`:
-
-```js
-headers: {
-    "Cross-Origin-Opener-Policy": "same-origin",
-    "Cross-Origin-Embedder-Policy": "credentialless",
-}
+```bash
+git add .
+git commit -m "Brief description of your changes"
+git push origin feature-your-feature
 ```
+### Create a Pull Request: 
+Head to the original repository and click "Pull Request." Choose the develop branch as the target and provide a detailed description of your changes. Afterward, submit the pull request.
 
-## Structure of the app
+### Review and Collaboration: 
+I will review your pull request and might offer feedback or suggestions to enhance your contribution. Collaboration and iteration are key!
 
-**`App.tsx`**
+### Merge and Celebrate: 
+Once your pull request is approved and any requested changes are addressed, your contribution will be merged into the develop branch. Congratulations, you've successfully contributed to the SAM Implementation Demo App! 🎉
 
-- Initializes ONNX model
-- Loads image embedding and image
-- Runs the ONNX model based on input prompts
+## 👨‍💻 Tech Stack:
 
-**`Stage.tsx`**
+ | [React](https://es.react.dev/)
+ | [TypeScript](https://www.typescriptlang.org/)
+ | [Sass](https://sass-lang.com/)
+ | [Tailwind CSS](https://tailwindcss.com/)
+ | [Testing Library](https://testing-library.com/)
+ | [ESLint](https://eslint.org/)
+ | [Webpack](https://webpack.js.org/)
+ | [Babel](https://babeljs.io/)
+ |
 
-- Handles mouse move interaction to update the ONNX model prompt
-
-**`Tool.tsx`**
-
-- Renders the image and the mask prediction
-
-**`helpers/maskUtils.tsx`**
-
-- Conversion of ONNX model output from array to an HTMLImageElement
-
-**`helpers/onnxModelAPI.tsx`**
-
-- Formats the inputs for the ONNX model
-
-**`helpers/scaleHelper.tsx`**
-
-- Handles image scaling logic for SAM (longest size 1024)
-
-**`hooks/`**
-
-- Handle shared state for the app
+## Authors
+[🐱‍💻@SantiSB](https://github.com/SantiSB)
